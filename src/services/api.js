@@ -109,9 +109,9 @@ if (!localStorage.getItem('afford_notifications')) {
 }
 
 export const fetchNotifications = async (params = {}) => {
-  const { page = 1, limit = 10, notification_type = 'All' } = params;
+  const { page = 1, limit = 10, notification_type = 'All', search = '' } = params;
   
-  logger.info('API_REQUEST', `GET /notifications - page=${page}, limit=${limit}, type=${notification_type}`, params);
+  logger.info('API_REQUEST', `GET /notifications - page=${page}, limit=${limit}, type=${notification_type}, search=${search}`, params);
   
   try {
     const queryParams = {};
@@ -120,10 +120,13 @@ export const fetchNotifications = async (params = {}) => {
     if (notification_type && notification_type !== 'All') {
       queryParams.notification_type = notification_type;
     }
+    if (search) {
+      queryParams.search = search;
+    }
 
     const response = await axios.get(API_BASE_URL, { 
       params: queryParams,
-      timeout: 3000 // fail fast if network unavailable
+      timeout: 3000 
     });
     
     logger.info('API_RESPONSE', 'Fetched successfully from server', response.data);
@@ -135,9 +138,17 @@ export const fetchNotifications = async (params = {}) => {
     // Simulate database queries locally
     let localData = JSON.parse(localStorage.getItem('afford_notifications') || '[]');
     
-    // Filter
+    // Filter by type
     if (notification_type && notification_type !== 'All') {
       localData = localData.filter(item => item.type.toLowerCase() === notification_type.toLowerCase());
+    }
+
+    // Filter by search keywords
+    if (search) {
+      localData = localData.filter(item => 
+        item.message.toLowerCase().includes(search.toLowerCase()) || 
+        item.type.toLowerCase().includes(search.toLowerCase())
+      );
     }
     
     const totalCount = localData.length;

@@ -19,7 +19,9 @@ import {
   Paper,
   Button,
   Grid,
-  Tooltip
+  Tooltip,
+  TextField,
+  InputAdornment
 } from '@mui/material';
 import ReadIcon from '@mui/icons-material/Drafts';
 import UnreadIcon from '@mui/icons-material/MarkEmailUnread';
@@ -29,6 +31,8 @@ import EventIcon from '@mui/icons-material/Campaign';
 import ResultIcon from '@mui/icons-material/AssignmentTurnedIn';
 import PlacementIcon from '@mui/icons-material/Work';
 import WarnIcon from '@mui/icons-material/NotificationImportant';
+import SearchIcon from '@mui/icons-material/Search';
+import ClearIcon from '@mui/icons-material/Clear';
 import { fetchNotifications, markAsReadInApi, markAsUnreadInApi, deleteNotificationInApi } from '../services/api';
 import logger from '../middleware/logger';
 
@@ -39,15 +43,22 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
   const page = parseInt(searchParams.get('page')) || 1;
   const limit = parseInt(searchParams.get('limit')) || 5;
   const typeFilter = searchParams.get('notification_type') || 'All';
+  const searchQuery = searchParams.get('search') || '';
 
   const [loading, setLoading] = useState(true);
   const [notifications, setNotifications] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(searchQuery);
   const [paginationInfo, setPaginationInfo] = useState({
     currentPage: 1,
     totalPages: 1,
     pageSize: 5,
     totalCount: 0
   });
+
+  // Keep local search input field text synchronized with URL search parameter changes
+  useEffect(() => {
+    setSearchTerm(searchQuery);
+  }, [searchQuery]);
 
   // Fetch notifications based on current query parameters
   const loadNotifications = async () => {
@@ -56,7 +67,8 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
       const response = await fetchNotifications({
         page,
         limit,
-        notification_type: typeFilter
+        notification_type: typeFilter,
+        search: searchQuery
       });
       if (response && response.success) {
         setNotifications(response.data);
@@ -72,35 +84,64 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
   // Run on mount, search param changes, or when parent triggers refresh (e.g., simulated real-time event)
   useEffect(() => {
     loadNotifications();
-  }, [page, limit, typeFilter, triggerRefresh]);
+  }, [page, limit, typeFilter, searchQuery, triggerRefresh]);
 
   // Handle tab filter change
   const handleTabChange = (event, newValue) => {
     logger.info('UI_ACTION', `Changed filter tab to: ${newValue}`);
-    setSearchParams({
-      page: 1, // reset page
+    const params = {
+      page: 1,
       limit,
       notification_type: newValue
-    });
+    };
+    if (searchQuery) params.search = searchQuery;
+    setSearchParams(params);
   };
 
   // Handle page change
   const handlePageChange = (event, newPage) => {
     logger.info('UI_ACTION', `Navigated to page: ${newPage}`);
-    setSearchParams({
+    const params = {
       page: newPage,
       limit,
       notification_type: typeFilter
-    });
+    };
+    if (searchQuery) params.search = searchQuery;
+    setSearchParams(params);
   };
 
   // Handle limit change
   const handleLimitChange = (event) => {
     const newLimit = event.target.value;
     logger.info('UI_ACTION', `Changed page size limit to: ${newLimit}`);
-    setSearchParams({
-      page: 1, // reset page
+    const params = {
+      page: 1,
       limit: newLimit,
+      notification_type: typeFilter
+    };
+    if (searchQuery) params.search = searchQuery;
+    setSearchParams(params);
+  };
+
+  // Handle search text query change
+  const handleSearchChange = (event) => {
+    const val = event.target.value;
+    setSearchTerm(val);
+    const params = {
+      page: 1,
+      limit,
+      notification_type: typeFilter
+    };
+    if (val) params.search = val;
+    setSearchParams(params);
+  };
+
+  // Clear search filter
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    setSearchParams({
+      page: 1,
+      limit,
       notification_type: typeFilter
     });
   };
@@ -172,6 +213,42 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
           </Button>
         )}
       </Box>
+
+      {/* Search Input Bar */}
+      <TextField
+        fullWidth
+        variant="outlined"
+        placeholder="Search notifications by keywords..."
+        value={searchTerm}
+        onChange={handleSearchChange}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <SearchIcon sx={{ color: 'text.secondary' }} />
+            </InputAdornment>
+          ),
+          endAdornment: searchTerm && (
+            <InputAdornment position="end">
+              <IconButton size="small" onClick={handleClearSearch} sx={{ color: 'text.secondary', '&:hover': { color: 'error.main' } }}>
+                <ClearIcon fontSize="small" />
+              </IconButton>
+            </InputAdornment>
+          )
+        }}
+        sx={{
+          mb: 3,
+          '& .MuiOutlinedInput-root': {
+            backgroundColor: 'background.paper',
+            borderRadius: '8px',
+            '& fieldset': {
+              borderColor: 'divider',
+            },
+            '&:hover fieldset': {
+              borderColor: 'primary.main',
+            },
+          }
+        }}
+      />
 
       {/* Filter Tabs & Limit Selector */}
       <Paper 
