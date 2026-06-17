@@ -33,6 +33,7 @@ import ResultIcon from '@mui/icons-material/AssignmentTurnedIn';
 import SimIcon from '@mui/icons-material/FlashOn';
 import UserIcon from '@mui/icons-material/AccountCircle';
 import HelpIcon from '@mui/icons-material/Help';
+import HamburgerIcon from '@mui/icons-material/Menu';
 import logger from '../middleware/logger';
 import { injectRealtimeNotification } from '../services/api';
 
@@ -125,6 +126,11 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
   const location = useLocation();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  const handleDrawerToggle = () => {
+    setMobileOpen(!mobileOpen);
+  };
 
   const handleSimMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -149,6 +155,75 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
     { text: 'Priority Inbox', path: '/priority', icon: <PriorityIcon />, badge: priorityCount }
   ];
 
+  const drawerContent = (
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', backgroundColor: 'background.paper' }}>
+      <Toolbar />
+      <Box sx={{ overflow: 'auto', mt: 2, flexGrow: 1 }}>
+        <List>
+          {menuItems.map((item) => (
+            <ListItem key={item.text} disablePadding>
+              <ListItemButton
+                component={NavLink}
+                to={item.path}
+                className={({ isActive }) => isActive ? 'active' : ''}
+                onClick={() => {
+                  logger.info('UI_ACTION', `Navigated to ${item.text}`);
+                  setMobileOpen(false); // Close drawer on mobile click
+                }}
+              >
+                <ListItemIcon>
+                  <Badge badgeContent={item.badge} color={item.path === '/priority' ? 'secondary' : 'primary'} max={99}>
+                    {item.icon}
+                  </Badge>
+                </ListItemIcon>
+                <ListItemText 
+                  primary={item.text} 
+                  primaryTypographyProps={{ fontWeight: 600, fontSize: '0.95rem' }} 
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+        </List>
+
+        <Divider sx={{ my: 2 }} />
+
+        {/* Quick Priority Info Panel */}
+        <Box sx={{ px: 3, py: 1 }}>
+          <Paper 
+            variant="outlined" 
+            sx={{ 
+              p: 2, 
+              backgroundColor: 'rgba(79, 70, 229, 0.04)', 
+              borderColor: '#e2e8f0',
+              borderRadius: 2 
+            }}
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+              <HelpIcon sx={{ fontSize: 16, color: 'primary.light' }} />
+              <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '0.5px' }}>
+                PRIORITY WEIGHTS
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary">Placement</Typography>
+                <Chip label="W3" size="small" sx={{ height: 16, fontSize: '9px', fontWeight: 800, bgcolor: '#c084fc', color: '#0f172a' }} />
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary">Result</Typography>
+                <Chip label="W2" size="small" sx={{ height: 16, fontSize: '9px', fontWeight: 800, bgcolor: '#34d399', color: '#0f172a' }} />
+              </Box>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <Typography variant="caption" color="text.secondary">Event</Typography>
+                <Chip label="W1" size="small" sx={{ height: 16, fontSize: '9px', fontWeight: 800, bgcolor: '#fbbf24', color: '#0f172a' }} />
+              </Box>
+            </Box>
+          </Paper>
+        </Box>
+      </Box>
+    </Box>
+  );
+
   return (
     <ThemeProvider theme={lightTheme}>
       <CssBaseline />
@@ -158,24 +233,34 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
         <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
           <Toolbar sx={{ justifyContent: 'space-between' }}>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 1, display: { md: 'none' } }}
+              >
+                <HamburgerIcon />
+              </IconButton>
+
               <Box 
                 sx={{ 
                   backgroundColor: '#4f46e5', 
                   borderRadius: 2, 
                   p: 0.7, 
-                  display: 'flex', 
+                  display: { xs: 'none', sm: 'flex' },
                   alignItems: 'center',
                   boxShadow: '0 0 15px rgba(99, 102, 241, 0.2)'
                 }}
               >
                 <GraduationIcon sx={{ color: 'white', fontSize: 24 }} />
               </Box>
-              <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 800, color: 'text.primary' }}>
+              <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 800, color: 'text.primary', fontSize: { xs: '1rem', sm: '1.25rem' } }}>
                 Afford Notification Hub
               </Typography>
             </Box>
 
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {/* Simulation Center */}
               <Tooltip title="Simulate real-time push events">
                 <Button
@@ -189,13 +274,14 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
                     borderColor: 'rgba(244, 63, 94, 0.4)',
                     backgroundColor: 'rgba(244, 63, 94, 0.05)',
                     '&:hover': {
-                      borderColor: '#f43f5e',
+                      borderColor: '#e11d48',
                       backgroundColor: 'rgba(244, 63, 94, 0.1)',
                       transform: 'scale(1.02)'
                     },
                     textTransform: 'none',
                     fontWeight: 600,
-                    transition: 'all 0.2s'
+                    transition: 'all 0.2s',
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' }
                   }}
                 >
                   Live Simulator
@@ -209,9 +295,9 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
                 PaperProps={{
                   sx: {
                     mt: 1.5,
-                    border: '1px solid #1e293b',
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
-                    backgroundColor: '#0e1322'
+                    border: '1px solid #e2e8f0',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.05)',
+                    backgroundColor: '#ffffff'
                   }
                 }}
               >
@@ -230,8 +316,8 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
               </Menu>
 
               {/* Student Meta Info */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, borderLeft: '1px solid #1e293b', pl: 2 }}>
-                <Avatar sx={{ bgcolor: '#4f46e5', width: 32, height: 32, fontSize: '14px', fontWeight: 'bold' }}>S</Avatar>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, borderLeft: '1px solid #e2e8f0', pl: 1.5 }}>
+                <Avatar sx={{ bgcolor: '#4f46e5', width: 28, height: 28, fontSize: '12px', fontWeight: 'bold' }}>S</Avatar>
                 <Box sx={{ display: { xs: 'none', md: 'block' } }}>
                   <Typography variant="body2" sx={{ fontWeight: 700, lineHeight: 1 }}>Student ID: 1042</Typography>
                   <Typography variant="caption" color="text.secondary">CSE Semester 6</Typography>
@@ -241,81 +327,45 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
           </Toolbar>
         </AppBar>
 
-        {/* Sidebar Navigation */}
+        {/* Responsive Mobile Drawer */}
+        <Drawer
+          variant="temporary"
+          open={mobileOpen}
+          onClose={handleDrawerToggle}
+          ModalProps={{
+            keepMounted: true, // Better open performance on mobile.
+          }}
+          sx={{
+            display: { xs: 'block', md: 'none' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+          }}
+        >
+          {drawerContent}
+        </Drawer>
+
+        {/* Desktop Permanent Drawer */}
         <Drawer
           variant="permanent"
           sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: 'border-box' },
+            display: { xs: 'none', md: 'block' },
+            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
           }}
+          open
         >
-          <Toolbar />
-          <Box sx={{ overflow: 'auto', mt: 2 }}>
-            <List>
-              {menuItems.map((item) => (
-                <ListItem key={item.text} disablePadding>
-                  <ListItemButton
-                    component={NavLink}
-                    to={item.path}
-                    className={({ isActive }) => isActive ? 'active' : ''}
-                    onClick={() => logger.info('UI_ACTION', `Navigated to ${item.text}`)}
-                  >
-                    <ListItemIcon>
-                      <Badge badgeContent={item.badge} color={item.path === '/priority' ? 'secondary' : 'primary'} max={99}>
-                        {item.icon}
-                      </Badge>
-                    </ListItemIcon>
-                    <ListItemText 
-                      primary={item.text} 
-                      primaryTypographyProps={{ fontWeight: 600, fontSize: '0.95rem' }} 
-                    />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-
-            <Divider sx={{ my: 2 }} />
-
-            {/* Quick Priority Info Panel */}
-            <Box sx={{ px: 3, py: 1 }}>
-              <Paper 
-                variant="outlined" 
-                sx={{ 
-                  p: 2, 
-                  backgroundColor: 'rgba(79, 70, 229, 0.04)', 
-                  borderColor: '#e2e8f0',
-                  borderRadius: 2 
-                }}
-              >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                  <HelpIcon sx={{ fontSize: 16, color: 'primary.light' }} />
-                  <Typography variant="caption" sx={{ fontWeight: 700, color: 'text.primary', letterSpacing: '0.5px' }}>
-                    PRIORITY WEIGHTS
-                  </Typography>
-                </Box>
-                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.8 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" color="text.secondary">Placement</Typography>
-                    <Chip label="W3" size="small" sx={{ height: 16, fontSize: '9px', fontWeight: 800, bgcolor: '#c084fc', color: '#0f172a' }} />
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" color="text.secondary">Result</Typography>
-                    <Chip label="W2" size="small" sx={{ height: 16, fontSize: '9px', fontWeight: 800, bgcolor: '#34d399', color: '#0f172a' }} />
-                  </Box>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" color="text.secondary">Event</Typography>
-                    <Chip label="W1" size="small" sx={{ height: 16, fontSize: '9px', fontWeight: 800, bgcolor: '#fbbf24', color: '#0f172a' }} />
-                  </Box>
-                </Box>
-              </Paper>
-            </Box>
-
-          </Box>
+          {drawerContent}
         </Drawer>
 
         {/* Content Panel */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3, pt: 11, pb: 12 }}>
+        <Box 
+          component="main" 
+          sx={{ 
+            flexGrow: 1, 
+            p: { xs: 2, md: 3 }, 
+            pt: 11, 
+            pb: 12,
+            width: { md: `calc(100% - ${drawerWidth}px)` }
+          }}
+        >
           {children}
         </Box>
       </Box>
