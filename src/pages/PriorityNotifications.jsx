@@ -178,7 +178,7 @@ const PriorityNotifications = ({ triggerRefresh, onRefreshComplete }) => {
                           <Box sx={{ mt: 0.5, p: 0.8, backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: '50%' }}>
                             {config.icon}
                           </Box>
-                          <Box>
+                          <Box sx={{ minWidth: 0, flex: 1 }}>
                             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.8, flexWrap: 'wrap' }}>
                               <Chip 
                                 label={config.label} 
@@ -202,7 +202,17 @@ const PriorityNotifications = ({ triggerRefresh, onRefreshComplete }) => {
                           </Box>
                         </Grid>
 
-                        <Grid item xs={12} sm={3} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Grid 
+                          item 
+                          xs={12} 
+                          sm={3} 
+                          sx={{ 
+                            display: 'flex', 
+                            justifyContent: { xs: 'flex-start', sm: 'flex-end' }, 
+                            pl: { xs: 7.5, sm: 0 }, 
+                            gap: 1 
+                          }}
+                        >
                           <Tooltip title="Mark as Read">
                             <IconButton 
                               size="small" 

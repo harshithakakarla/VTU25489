@@ -190,7 +190,16 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+      <Box 
+        sx={{ 
+          display: 'flex', 
+          flexDirection: { xs: 'column', sm: 'row' }, 
+          justifyContent: 'space-between', 
+          alignItems: { xs: 'flex-start', sm: 'center' }, 
+          gap: 2,
+          mb: 3 
+        }}
+      >
         <Box>
           <Typography variant="h5" sx={{ fontWeight: 800 }}>
             All Notifications
@@ -263,7 +272,9 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
           flexDirection: { xs: 'column', sm: 'row' },
           justifyContent: 'space-between',
           alignItems: 'center',
-          gap: 2
+          gap: 2,
+          width: '100%',
+          overflow: 'hidden'
         }}
       >
         <Tabs 
@@ -271,11 +282,18 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
           onChange={handleTabChange}
           indicatorColor="primary"
           textColor="primary"
+          variant="scrollable"
+          scrollButtons="auto"
+          allowScrollButtonsMobile
           sx={{
+            width: '100%',
+            '& .MuiTabs-scroller': {
+              display: 'flex',
+            },
             '& .MuiTab-root': {
               fontWeight: 600,
               textTransform: 'none',
-              minWidth: 90,
+              minWidth: { xs: 70, sm: 90 },
               fontSize: '0.9rem'
             }
           }}
@@ -387,8 +405,8 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
                       <Box sx={{ mt: 0.5, p: 1, backgroundColor: 'rgba(0,0,0,0.03)', borderRadius: '50%' }}>
                         {config.icon}
                       </Box>
-                      <Box>
-                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.8 }}>
+                      <Box sx={{ minWidth: 0, flex: 1 }}>
+                        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', mb: 0.8, flexWrap: 'wrap' }}>
                           <Chip 
                             label={config.label} 
                             size="small" 
@@ -432,7 +450,18 @@ const Notifications = ({ triggerRefresh, onRefreshComplete }) => {
                     </Grid>
 
                     {/* Actions Panel */}
-                    <Grid item xs={12} sm={4} md={3} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                    <Grid 
+                      item 
+                      xs={12} 
+                      sm={4} 
+                      md={3} 
+                      sx={{ 
+                        display: 'flex', 
+                        justifyContent: { xs: 'flex-start', sm: 'flex-end' }, 
+                        pl: { xs: 7.5, sm: 0 }, 
+                        gap: 1 
+                      }}
+                    >
                       {notif.isRead ? (
                         <Tooltip title="Mark as Unread">
                           <IconButton 

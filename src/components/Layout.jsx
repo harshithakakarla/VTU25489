@@ -262,13 +262,11 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              {/* Simulation Center */}
               <Tooltip title="Simulate real-time push events">
                 <Button
                   variant="outlined"
                   color="secondary"
                   size="small"
-                  startIcon={<SimIcon />}
                   onClick={handleSimMenuOpen}
                   sx={{
                     borderRadius: '8px',
@@ -282,10 +280,15 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
                     textTransform: 'none',
                     fontWeight: 600,
                     transition: 'all 0.2s',
-                    fontSize: { xs: '0.75rem', sm: '0.875rem' }
+                    fontSize: { xs: '0.75rem', sm: '0.875rem' },
+                    minWidth: { xs: 0, sm: 'auto' },
+                    px: { xs: 1, sm: 1.5 }
                   }}
                 >
-                  Live Simulator
+                  <SimIcon sx={{ mr: { xs: 0, sm: 0.5 }, fontSize: '1.1rem' }} />
+                  <Box component="span" sx={{ display: { xs: 'none', sm: 'inline' } }}>
+                    Live Simulator
+                  </Box>
                 </Button>
               </Tooltip>
 
