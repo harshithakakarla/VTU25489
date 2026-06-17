@@ -367,7 +367,8 @@ const Layout = ({ children, unreadCount, priorityCount, onNotificationInjected }
             p: { xs: 2, md: 3 }, 
             pt: 11, 
             pb: 12,
-            width: { md: `calc(100% - ${drawerWidth}px)` }
+            width: { md: `calc(100% - ${drawerWidth}px)` },
+            ml: { md: `${drawerWidth}px` }
           }}
         >
           {children}
