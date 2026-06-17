@@ -23,7 +23,8 @@ import {
   ListItemIcon as MenuIcon,
   Tooltip,
   Paper,
-  Chip
+  Chip,
+  IconButton
 } from '@mui/material';
 import AllIcon from '@mui/icons-material/Notifications';
 import PriorityIcon from '@mui/icons-material/Star';
